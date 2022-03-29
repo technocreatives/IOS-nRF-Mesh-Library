@@ -213,6 +213,55 @@ public extension MeshNetwork {
         // No address was found :(
         return nil
     }
+
+    /// Returns the next available Group Address in given address range
+    /// that can be assigned to a new Group.
+    ///
+    /// - parameter range: Group address range.
+    /// - returns: The next available Group Address that can be assigned to a new Group,
+    ///            or `nil`, if there are no more available addresses in the allocated range.
+    func nextAvailableGroupAddress(in range: AddressRange) -> Address? {
+        guard range.isGroupRange else {
+            return nil
+        }
+
+        let sortedGroups = groups.sorted { $0.groupAddress < $1.groupAddress }
+
+        // Iterate through all groups just once, while iterating over ranges.
+        var index = 0
+        // Start from the beginning of the current range.
+        var address = range.lowAddress
+
+        // Iterate through groups that weren't checked yet.
+        let currentIndex = index
+        for _ in currentIndex..<sortedGroups.count {
+            let group = sortedGroups[index]
+            index += 1
+
+            // Skip groups with addresses below the range.
+            if address > group.address.address {
+                continue
+            }
+            // If we found a space before the current node, return the address.
+            if address < group.address.address {
+                return address
+            }
+            // Else, move the address to the next available address.
+            address = group.address.address + 1
+
+            // If the new address is outside of the range, go to the next one.
+            if address > range.highAddress {
+                break
+            }
+        }
+
+        // If the range has available space, return the address.
+        if address <= range.highAddress {
+            return address
+        }
+
+        return nil
+    }
     
     /// Returns the next available Group Address from the local Provisioner's range
     /// that can be assigned to a new Group.
