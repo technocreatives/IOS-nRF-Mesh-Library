@@ -58,9 +58,9 @@ public class Provisioner: Codable {
                 allocatedSceneRange:   [SceneRange]) {
         self.name = name
         self.uuid = uuid
-        self.allocatedUnicastRange = allocatedUnicastRange.merged()
-        self.allocatedGroupRange   = allocatedGroupRange.merged()
-        self.allocatedSceneRange   = allocatedSceneRange.merged()
+        self.allocatedUnicastRange = allocatedUnicastRange
+        self.allocatedGroupRange   = allocatedGroupRange
+        self.allocatedSceneRange   = allocatedSceneRange
     }
     
     public convenience init(name: String,
@@ -103,9 +103,9 @@ public class Provisioner: Codable {
         uuid = try container.decode(UUID.self, forKey: .uuid,
                                     orConvert: MeshUUID.self, forKey: .uuid, using: { $0.uuid })
         
-        allocatedUnicastRange = try container.decode([AddressRange].self, forKey: .allocatedUnicastRange).merged()
-        allocatedGroupRange = try container.decode([AddressRange].self, forKey: .allocatedGroupRange).merged()
-        allocatedSceneRange = try container.decode([SceneRange].self, forKey: .allocatedSceneRange).merged()
+        allocatedUnicastRange = try container.decode([AddressRange].self, forKey: .allocatedUnicastRange)
+        allocatedGroupRange = try container.decode([AddressRange].self, forKey: .allocatedGroupRange)
+        allocatedSceneRange = try container.decode([SceneRange].self, forKey: .allocatedSceneRange)
     }
 }
 
