@@ -100,6 +100,60 @@ class AssigningGroupAddresses: XCTestCase {
         
         XCTAssertNil(address)
     }
+
+    func testGroupAddressInRange_invalid_range() {
+        let meshNetwork = MeshNetwork(name: "Test network")
+        // Not a group range
+        let addressRange = AddressRange(0x0000...0x0001)
+
+        let address = meshNetwork.nextAvailableGroupAddress(in: addressRange)
+
+        XCTAssertNil(address)
+    }
+
+    func testGroupAddressInRange_empty() {
+        let meshNetwork = MeshNetwork(name: "Test network")
+        let addressRange = AddressRange(0xC000...0xC008)
+
+        let address = meshNetwork.nextAvailableGroupAddress(in: addressRange)
+
+        XCTAssertNotNil(address)
+        XCTAssertEqual(address!, 0xC000)
+    }
+
+    func testGroupAddressInRange_basic() {
+        let meshNetwork = MeshNetwork(name: "Test network")
+
+        let addressRange = AddressRange(0xD015...0xD0FF)
+
+        let address = meshNetwork.nextAvailableGroupAddress(in: addressRange)
+
+        XCTAssertNotNil(address)
+        XCTAssertEqual(address!, 0xD015)
+    }
+
+    func testGroupAddressInRange_some() {
+        let meshNetwork = MeshNetwork(name: "Test network")
+        let addressRange = AddressRange(0xC000...0xC008)
+        XCTAssertNoThrow(try meshNetwork.add(group: Group(name: "Group 1", address: 0xC000)))
+        XCTAssertNoThrow(try meshNetwork.add(group: Group(name: "Group 2", address: 0xC001)))
+
+        let address = meshNetwork.nextAvailableGroupAddress(in: addressRange)
+
+        XCTAssertNotNil(address)
+        XCTAssertEqual(address!, 0xC002)
+    }
+
+    func testGroupAddressInRange_no_more() {
+        let meshNetwork = MeshNetwork(name: "Test network")
+        let addressRange = AddressRange(0xC000...0xC001)
+        XCTAssertNoThrow(try meshNetwork.add(group: Group(name: "Group 1", address: 0xC000)))
+        XCTAssertNoThrow(try meshNetwork.add(group: Group(name: "Group 2", address: 0xC001)))
+
+        let address = meshNetwork.nextAvailableGroupAddress(in: addressRange)
+
+        XCTAssertNil(address)
+    }
     
     func testAssigningGroupAddressRanges_boundaries() {
         let meshNetwork = MeshNetwork(name: "Test network")
