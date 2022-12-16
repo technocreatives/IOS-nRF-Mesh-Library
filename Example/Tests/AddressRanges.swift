@@ -145,9 +145,13 @@ class AddressRanges: XCTestCase {
         XCTAssertEqual(result[2].upperBound, 5000)
         
         let result2 = ranges + AddressRange(1001...1999)
-        XCTAssertEqual(result2.count, 1)
+        XCTAssertEqual(result2.count, 3)
         XCTAssertEqual(result2[0].lowerBound, 1)
-        XCTAssertEqual(result2[0].upperBound, 3000)
+        XCTAssertEqual(result2[0].upperBound, 1000)
+        XCTAssertEqual(result2[1].lowerBound, 1001)
+        XCTAssertEqual(result2[1].upperBound, 1999)
+        XCTAssertEqual(result2[2].lowerBound, 2000)
+        XCTAssertEqual(result2[2].upperBound, 3000)
     }
     
     func testAddArray() {

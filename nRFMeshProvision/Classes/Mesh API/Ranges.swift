@@ -129,8 +129,8 @@ public extension Array where Element: RangeObject {
                 // Do nothing.
             }
                 
-                // Does the range start inside the accumulator, or just after the accumulator?
-            else if accumulator.range.upperBound + 1 >= range.range.lowerBound {
+                // Does the range start inside the accumulator?
+            else if accumulator.range.upperBound >= range.range.lowerBound {
                 // Set the accumulator as merged range.
                 accumulator = RangeType.init(accumulator.range.lowerBound...range.range.upperBound)
             }

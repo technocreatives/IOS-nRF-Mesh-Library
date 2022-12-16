@@ -77,7 +77,26 @@ public extension MeshNetwork {
     func nodes(registeredTo scene: SceneNumber) -> [Node] {
         return scenes[scene]?.nodes ?? []
     }
-    
+
+    /// Returns the next available Scene number in given range for local provisioner
+    /// that can be assigned to a new Scene.
+    ///
+    /// - parameter range: Scene number range.
+    /// - returns: The next available Scene number that can be assigned to a new Scene,
+    ///            or `nil`, if there are no more available numbers in the allocated range.
+    func nextAvailableScene(in range: SceneRange) -> Address? {
+        guard range.isValid else {
+            return nil
+        }
+
+        let assignedSceneNumbers = scenes.map { $0.number }
+        for number in range.range where !assignedSceneNumbers.contains(number) {
+            return number
+        }
+        // No scene number was found :(
+        return nil
+    }
+
     /// Returns the next available Scene number from the Provisioner's range
     /// that can be assigned to a new Scene.
     ///
@@ -86,40 +105,9 @@ public extension MeshNetwork {
     /// - returns: The next available Scene number that can be assigned to a new Scene,
     ///            or `nil`, if there are no more available numbers in the allocated range.
     func nextAvailableScene(for provisioner: Provisioner) -> SceneNumber? {
-        let sortedScenes = scenes.sorted { $0.number < $1.number }
-        
-        // Iterate through all scenes just once, while iterating over ranges.
-        var index = 0
         for range in provisioner.allocatedSceneRange {
-            // Start from the beginning of the current range.
-            var scene = range.firstScene
-            
-            // Iterate through scene objects that weren't checked yet.
-            let currentIndex = index
-            for _ in currentIndex..<sortedScenes.count {
-                let sceneObject = sortedScenes[index]
-                index += 1
-                
-                // Skip scenes with number below the range.
-                if scene > sceneObject.number {
-                    continue
-                }
-                // If we found a space before the current node, return the scene number.
-                if scene < sceneObject.number {
-                    return scene
-                }
-                // Else, move the address to the next available address.
-                scene = sceneObject.number + 1
-                
-                // If the new scene number is outside of the range, go to the next one.
-                if scene > range.lastScene {
-                    break
-                }
-            }
-            
-            // If the range has available space, return the address.
-            if scene <= range.lastScene {
-                return scene
+            if let number = nextAvailableScene(in: range) {
+                return number
             }
         }
         // No scene number was found :(

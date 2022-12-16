@@ -67,6 +67,13 @@ class AssigningGroupAddresses: XCTestCase {
         
         XCTAssertNotNil(address)
         XCTAssertEqual(address!, 0xD015)
+
+        XCTAssertNoThrow(try meshNetwork.add(group: Group(name: "Group 1", address: address!)))
+
+        let nextAddress = meshNetwork.nextAvailableGroupAddress(for: provisioner)
+
+        XCTAssertNotNil(nextAddress)
+        XCTAssertEqual(nextAddress!, 0xD016)
     }
     
     func testAssigningGroupAddress_some() {
@@ -99,6 +106,21 @@ class AssigningGroupAddresses: XCTestCase {
         let address = meshNetwork.nextAvailableGroupAddress(for: provisioner)
         
         XCTAssertNil(address)
+    }
+
+    func testAssigningGroupAddress_in_range() {
+        let meshNetwork = MeshNetwork(name: "Test network")
+
+        let provisioner = Provisioner(name: "Test provisioner",
+                                      allocatedUnicastRange: [ AddressRange(1...0x7FFF) ],
+                                      allocatedGroupRange: [ AddressRange(0xC000...0xC001) ],
+                                      allocatedSceneRange: [])
+        XCTAssertNoThrow(try meshNetwork.add(group: Group(name: "Group 1", address: 0xC000)))
+
+        let address = meshNetwork.nextAvailableGroupAddress(in: provisioner.allocatedGroupRange[0])
+
+        XCTAssertNotNil(address)
+        XCTAssertEqual(address!, 0xC001)
     }
     
     func testAssigningGroupAddressRanges_boundaries() {
